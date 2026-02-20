@@ -149,6 +149,60 @@ const TEMPLE_LORE = [
   'Zeus rewards mastery: survive chaos and command the storm.',
 ]
 
+const TEMPLE_PARALLAX = [
+  {
+    layers: [
+      { key: 'athena_sky', path: '/backgrounds/athena/sky.svg', speed: 0.0038, alpha: 0.985, waveAmp: 0.8, waveSpeed: 0.00045 },
+      { key: 'athena_mid', path: '/backgrounds/athena/mid.svg', speed: 0.0082, alpha: 0.955, waveAmp: 1.1, waveSpeed: 0.00055 },
+      { key: 'athena_front', path: '/backgrounds/athena/front.svg', speed: 0.0135, alpha: 0.935, waveAmp: 1.6, waveSpeed: 0.00075 },
+    ],
+  },
+  {
+    layers: [
+      { key: 'ares_sky', path: '/backgrounds/ares/sky.svg', speed: 0.0075, alpha: 0.92, waveAmp: 0.4, waveSpeed: 0.0003 },
+      { key: 'ares_mid', path: '/backgrounds/ares/mid.svg', speed: 0.0165, alpha: 0.9, waveAmp: 0.8, waveSpeed: 0.00045 },
+      { key: 'ares_front', path: '/backgrounds/ares/front.svg', speed: 0.028, alpha: 0.89, waveAmp: 1.2, waveSpeed: 0.0006 },
+    ],
+  },
+  {
+    layers: [
+      { key: 'zeus_sky', path: '/backgrounds/zeus/sky.svg', speed: 0.0082, alpha: 0.95, waveAmp: 1.8, waveSpeed: 0.0012 },
+      { key: 'zeus_mid', path: '/backgrounds/zeus/mid.svg', speed: 0.0195, alpha: 0.92, waveAmp: 2.8, waveSpeed: 0.0016 },
+      { key: 'zeus_front', path: '/backgrounds/zeus/front.svg', speed: 0.033, alpha: 0.91, waveAmp: 3.8, waveSpeed: 0.0022 },
+    ],
+  },
+]
+
+const TEMPLE_MOOD = [
+  {
+    starCount: 24,
+    starAlpha: [0.016, 0.085],
+    moteCount: 9,
+    moteDrift: 20,
+    overlayAlpha: 0.28,
+    glowColor: C.gold,
+    sigilAlpha: 0.25,
+  },
+  {
+    starCount: 12,
+    starAlpha: [0.008, 0.048],
+    moteCount: 22,
+    moteDrift: 52,
+    overlayAlpha: 0.49,
+    glowColor: C.neonOrange,
+    sigilAlpha: 0.16,
+  },
+  {
+    starCount: 42,
+    starAlpha: [0.03, 0.17],
+    moteCount: 20,
+    moteDrift: 40,
+    overlayAlpha: 0.33,
+    glowColor: C.neonCyan,
+    sigilAlpha: 0.24,
+  },
+]
+
 // ── UPGRADE POOL ─────────────────────────────────
 const UPGRADE_POOL = [
   { name: 'Gift of Life', desc: '+1 Life', icon: '♥', key: 'lives', delta: 1 },
@@ -359,6 +413,61 @@ function drawTempleSigil(scene, x, y, templeIdx, color, depth = 1, alpha = 0.22,
   return g
 }
 
+function preloadTempleParallax(scene) {
+  TEMPLE_PARALLAX.forEach((temple) => {
+    temple.layers.forEach((layer) => {
+      if (!scene.textures.exists(layer.key)) {
+        scene.load.image(layer.key, layer.path)
+      }
+    })
+  })
+}
+
+function createTempleParallax(scene, { templeIdx = 0, depth = -6 } = {}) {
+  if (scene.templeParallaxLayers?.length) {
+    scene.templeParallaxLayers.forEach((layer) => layer.destroy())
+  }
+  scene.templeParallaxLayers = []
+
+  const temple = TEMPLE_PARALLAX[templeIdx]
+  if (!temple) return false
+
+  const available = temple.layers.every((layer) => scene.textures.exists(layer.key))
+  if (!available) return false
+
+  temple.layers.forEach((layer, i) => {
+    const sprite = scene.add
+      .tileSprite(W / 2, H / 2, W, H, layer.key)
+      .setDepth(depth + i)
+      .setAlpha(layer.alpha ?? 1)
+      .setScrollFactor(0)
+    sprite.setData('parallaxSpeed', layer.speed)
+    sprite.setData('baseY', sprite.y)
+    sprite.setData('waveAmp', layer.waveAmp || 0)
+    sprite.setData('waveSpeed', layer.waveSpeed || 0)
+    sprite.setData('wavePhase', Math.random() * Math.PI * 2)
+    scene.templeParallaxLayers.push(sprite)
+  })
+
+  return true
+}
+
+function advanceTempleParallax(scene, delta = 0) {
+  if (!scene.templeParallaxLayers?.length) return
+  const now = scene.time?.now || 0
+  scene.templeParallaxLayers.forEach((layer) => {
+    const speed = layer.getData('parallaxSpeed') || 0
+    layer.tilePositionX += speed * delta
+    const amp = layer.getData('waveAmp') || 0
+    const waveSpeed = layer.getData('waveSpeed') || 0
+    if (amp > 0 && waveSpeed > 0) {
+      const phase = layer.getData('wavePhase') || 0
+      const baseY = layer.getData('baseY') || layer.y
+      layer.y = baseY + Math.sin(now * waveSpeed + phase) * amp
+    }
+  })
+}
+
 function createTempleAtmosphere(scene, {
   templeIdx = 0,
   accent = C.neonCyan,
@@ -369,11 +478,13 @@ function createTempleAtmosphere(scene, {
   columns = false,
   vignette = true,
 } = {}) {
-  scene.add.rectangle(W / 2, H / 2, W, H, bgColor, 1).setDepth(depth)
-  scene.add.rectangle(W / 2, H * 0.28, W * 1.1, H * 0.68, accent, 0.03)
+  const mood = TEMPLE_MOOD[templeIdx] || TEMPLE_MOOD[0]
+  const hasParallax = createTempleParallax(scene, { templeIdx, depth: depth - 1 })
+  scene.add.rectangle(W / 2, H / 2, W, H, bgColor, hasParallax ? mood.overlayAlpha : 1).setDepth(depth)
+  scene.add.rectangle(W / 2, H * 0.28, W * 1.1, H * 0.68, accent, templeIdx === 1 ? 0.045 : 0.03)
     .setDepth(depth + 1)
     .setBlendMode(Phaser.BlendModes.SCREEN)
-  scene.add.circle(W * 0.24, H * 0.2, 96, accent, 0.03).setDepth(depth + 1)
+  scene.add.circle(W * 0.24, H * 0.2, 96, accent, templeIdx === 2 ? 0.04 : 0.03).setDepth(depth + 1)
   scene.add.circle(W * 0.79, H * 0.22, 78, C.neonCyan, 0.026).setDepth(depth + 1)
   scene.add.circle(W * 0.55, H * 0.34, 88, C.neonPurple, 0.022).setDepth(depth + 1)
 
@@ -385,13 +496,13 @@ function createTempleAtmosphere(scene, {
   fog.fillStyle(accent, 0.016)
   fog.fillRoundedRect(-40, H * 0.61, W + 80, 56, 36)
 
-  for (let i = 0; i < 42; i++) {
+  for (let i = 0; i < mood.starCount; i++) {
     const star = scene.add.circle(
       Phaser.Math.Between(24, W - 24),
       Phaser.Math.Between(12, H - 12),
       Phaser.Math.FloatBetween(0.45, 1.45),
       C.white,
-      Phaser.Math.FloatBetween(0.02, 0.12)
+      Phaser.Math.FloatBetween(mood.starAlpha[0], mood.starAlpha[1])
     ).setDepth(depth + 2)
     scene.tweens.add({
       targets: star,
@@ -403,18 +514,18 @@ function createTempleAtmosphere(scene, {
     })
   }
 
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < mood.moteCount; i++) {
     const mote = scene.add.circle(
       Phaser.Math.Between(50, W - 50),
       Phaser.Math.Between(70, H - 60),
       Phaser.Math.FloatBetween(1.2, 2.8),
-      Phaser.Math.Between(0, 1) ? C.neonCyan : accent,
+      Phaser.Math.Between(0, 1) ? mood.glowColor : accent,
       Phaser.Math.FloatBetween(0.06, 0.17)
     ).setDepth(depth + 2)
     scene.tweens.add({
       targets: mote,
-      y: mote.y + Phaser.Math.Between(-28, 28),
-      x: mote.x + Phaser.Math.Between(-36, 36),
+      y: mote.y + Phaser.Math.Between(-mood.moteDrift, mood.moteDrift),
+      x: mote.x + Phaser.Math.Between(-(mood.moteDrift + 8), mood.moteDrift + 8),
       alpha: { from: mote.alpha, to: Phaser.Math.FloatBetween(0.015, 0.11) },
       duration: Phaser.Math.Between(3400, 7600),
       yoyo: true,
@@ -446,7 +557,7 @@ function createTempleAtmosphere(scene, {
     })
   }
 
-  const sigil = drawTempleSigil(scene, W / 2, sigilY, templeIdx, accent, depth + 3, 0.2, sigilScale)
+  const sigil = drawTempleSigil(scene, W / 2, sigilY, templeIdx, accent, depth + 3, mood.sigilAlpha, sigilScale)
   scene.tweens.add({
     targets: sigil,
     angle: templeIdx === 1 ? -4 : 4,
@@ -499,6 +610,10 @@ function addEndScreenBackdrop(scene, { templeIdx = 0, accent = C.neonCyan, mood 
 class MenuScene extends Phaser.Scene {
   constructor() {
     super('MenuScene')
+  }
+
+  preload() {
+    preloadTempleParallax(this)
   }
 
   create() {
@@ -679,12 +794,20 @@ class MenuScene extends Phaser.Scene {
     this.cameras.main.fadeOut(350)
     this.time.delayedCall(350, () => this.scene.start('GameScene'))
   }
+
+  update(_, delta) {
+    advanceTempleParallax(this, delta)
+  }
 }
 
 // ══════════ GAME SCENE ═══════════════════════════
 class GameScene extends Phaser.Scene {
   constructor() {
     super('GameScene')
+  }
+
+  preload() {
+    preloadTempleParallax(this)
   }
 
   create() {
@@ -2027,6 +2150,8 @@ class GameScene extends Phaser.Scene {
 
   // ── UPDATE ───────────────────────────────────
   update(_, delta) {
+    advanceTempleParallax(this, delta)
+
     if (Phaser.Input.Keyboard.JustDown(this.keyR)) {
       this.registry.set('score', 0)
       this.registry.set('lives', 3)
@@ -2128,6 +2253,10 @@ class GameScene extends Phaser.Scene {
 class UpgradeScene extends Phaser.Scene {
   constructor() {
     super('UpgradeScene')
+  }
+
+  preload() {
+    preloadTempleParallax(this)
   }
 
   create() {
@@ -2291,6 +2420,10 @@ class UpgradeScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setShadow(0, 1, '#000000', 0.78, false, true)
   }
+
+  update(_, delta) {
+    advanceTempleParallax(this, delta)
+  }
 }
 
 // ══════════ GAME CONFIG ══════════════════════════
@@ -2299,6 +2432,12 @@ new Phaser.Game({
   parent: 'game',
   width: W,
   height: H,
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: W,
+    height: H,
+  },
   backgroundColor: '#0a0e27',
   physics: {
     default: 'arcade',

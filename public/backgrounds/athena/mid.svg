@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d8c9a0" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#d8c9a0" stop-opacity="0.26"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="transparent"/>
+  <path d="M0 760 C220 690, 380 700, 560 760 C760 830, 980 830, 1180 760 C1360 700, 1540 690, 1920 760 L1920 1080 L0 1080 Z" fill="#6b7280" fill-opacity="0.48"/>
+  <path d="M0 790 C180 730, 360 745, 560 800 C760 860, 1000 870, 1210 812 C1420 755, 1640 730, 1920 810 L1920 1080 L0 1080 Z" fill="#a8a29e" fill-opacity="0.46"/>
+  <rect x="0" y="0" width="1920" height="1080" fill="url(#haze)"/>
+</svg>

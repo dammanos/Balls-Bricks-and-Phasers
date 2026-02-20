@@ -13,6 +13,7 @@ const BRICK_H = 24
 const BRICK_GAP = 6
 const BRICK_COLS = 11
 const BRICK_START_Y = 100
+const BUILD_ID = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__ : 'dev'
 
 // Color palette
 const C = {
@@ -762,6 +763,15 @@ class MenuScene extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setShadow(0, 1, '#000000', 0.8, false, true)
+
+    this.add
+      .text(W - 14, H - 10, `Build ${BUILD_ID}`, {
+        fontFamily: 'system-ui',
+        fontSize: '11px',
+        color: '#334155',
+      })
+      .setOrigin(1, 1)
+      .setShadow(0, 1, '#000000', 0.75, false, true)
 
     this.input.keyboard.once('keydown-SPACE', () => {
       getAudioCtx()

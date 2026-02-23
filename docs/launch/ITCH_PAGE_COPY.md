@@ -4,41 +4,70 @@
 Neon Odyssey — A Greek Mythology Brick Breaker
 
 ## Short Description
-A polished neon brick-breaker where Greek gods grant powers, combos snowball hard, and every rebound is skill.
+Smash through 3 ancient Greek temples with god powers, explosive combos, and divine upgrades. A mythological brick-breaker built for Z01 Athens Jam.
 
 ## Long Description
-**Deflect destiny. Conquer Olympus.**
 
-Neon Odyssey is a score-attack brick-breaker set across three mythic Greek temples. Master precision rebounds, route your shots for long combo chains, and wield divine powers to crush impossible layouts.
+🏛️ **Neon Odyssey — A Greek Mythology Brick Breaker**
 
-### Why it feels great
-- **Skill-first combo system**: sustain chains with smart routing and timing
-- **Pro Mode pacing**: faster, tighter, and built for mastery
-- **Temple identity**: Athena, Ares, and Zeus each bring distinct visual mood
-- **God powers**: Zeus ⚡ Artemis 🏹 Hephaestus 🔥 Athena 🛡 Hermes 🪽
-- **Premium juice**: reactive HUD, impact VFX, dynamic background music
+*Deflect destiny. Conquer Olympus.*
 
-### Core Features
-- 9 handcrafted levels across 3 temples
-- 3 brick types (normal, strong, explosive Medusa)
-- Upgrade choice between temples
-- Procedural runtime art + audio (no asset-pack dependency)
+---
 
-### Controls
-- Move: Left/Right Arrow
-- Launch: Space or Left Click
-- Pause: P
-- Restart Run: R
+Built for **Z01 Athens: Balls, Bricks and Phasers**.
 
-### Best For
-Players who enjoy precision arcade games, score-chasing, and mastering game feel.
+Battle through **3 Greek temples** — Athens, Sparta, and Olympus — each with unique brick formations, escalating difficulty, and immersive procedural soundscapes.
+
+Collect **5 God Powers** dropped from destroyed bricks:
+⚡ Zeus's Chain Lightning | 🏹 Artemis's Triple Shot | 🔥 Hephaestus's Fireball | 🛡️ Athena's Divine Shield | 🪶 Hermes's Swift Grace
+
+Chain consecutive hits into **combos** for score multipliers. Between temples, pick a **Divine Blessing** upgrade to power up for the next challenge.
+
+---
+
+### ✨ Features
+
+- 🏛️ 9 hand-crafted levels across 3 themed temples (Athens → Sparta → Olympus)
+- 🧱 3 brick types: normal, reinforced (2-hit), Medusa (explosive chain)
+- ⚡ 5 unique God Powers with visual feedback
+- 🔥 Pro-focused combo system with visual timing meter
+- 🎮 3 difficulty modes: Mortal / Hero / Olympian
+- 🎲 Roguelite Divine Blessing upgrades between temples
+- 🎨 Animated parallax temple backdrops — all generated in code
+- 🎵 Layered procedural soundtrack per temple — zero external audio files
+- 📱 Full keyboard + touch/mobile support
+- 💾 Auto-save progress (continue where you left off)
+
+---
+
+### 🎮 How to play
+
+| Action | Keyboard | Touch/Mobile |
+|--------|----------|--------------|
+| Move paddle | ← → | Drag |
+| Launch ball | Space | Tap |
+| Pause | P | ⏸ button |
+| Restart | R | Tap prompt |
+
+Break all bricks to clear each level. Don't let every ball fall. Clear all 3 temples to conquer Olympus!
+
+---
+
+### 🔧 Tech
+
+- Built entirely in **Phaser 3** + vanilla JS
+- All visuals and audio **generated procedurally** — zero external art/sound assets
+- Bundled with Vite, deployed as static HTML
+
+---
 
 ## CTA Block
-Play now and share your best combo clip.
+Play now and chase the high score on Olympus. ⚡
 
 ## Credits
 - Engine: Phaser 3
 - Build: Vite
-- Font: Cinzel
-- Audio/FX/Gameplay visuals: generated in code
+- Font: Cinzel (Google Fonts, OFL license)
+- Audio/FX/Gameplay visuals: generated in code at runtime
 - Development support: GitHub Copilot
+- Pre-existing work reused: No (created for this jam)

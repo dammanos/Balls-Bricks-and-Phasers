@@ -12,7 +12,7 @@ const BRICK_W = 76
 const BRICK_H = 24
 const BRICK_GAP = 6
 const BRICK_COLS = 11
-const BRICK_START_Y = 100
+const BRICK_START_Y = 80
 const BUILD_ID = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__ : 'dev'
 
 // Color palette
@@ -39,105 +39,146 @@ function setHiScore(s) {
   try { localStorage.setItem('neonOdyssey_hi', String(s)) } catch {}
 }
 
+// ── FULL PROGRESS PERSISTENCE ────────────────────
+function saveProgress(data) {
+  try { localStorage.setItem('neonOdyssey_save', JSON.stringify(data)) } catch {}
+}
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem('neonOdyssey_save')
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+function clearProgress() {
+  try { localStorage.removeItem('neonOdyssey_save') } catch {}
+}
+
+// ── DIFFICULTY PRESETS ───────────────────────────
+const DIFFICULTY = {
+  easy:   { lives: 5, ballSpd: 280, paddleW: 170, dropRate: 28, comboWin: 2800, label: 'Mortal',   desc: 'Forgiving & fun' },
+  normal: { lives: 3, ballSpd: 320, paddleW: 140, dropRate: 18, comboWin: 2200, label: 'Hero',     desc: 'The intended challenge' },
+  hard:   { lives: 2, ballSpd: 370, paddleW: 115, dropRate: 12, comboWin: 1600, label: 'Olympian', desc: 'For the worthy' },
+}
+
 // ── TEMPLE DATA ──────────────────────────────────
 const TEMPLES = [
   {
     name: 'Temple of Athena',
     sub: 'Athens',
-    brickNormal: 0x3b82f6,
-    brickStrong: 0x1d4ed8,
-    brickMedusa: 0x7c3aed,
+    brickNormal: 0x60a5fa,
+    brickStrong: 0x38bdf8,
+    brickMedusa: 0x8b5cf6,
     accent: 0xfbbf24,
     bg: 0x0c1445,
     levels: [
+      // Athena 1 — Diamond of Wisdom
       [
-        '..1111111..',
-        '.112222211.',
-        '.123333321.',
-        '.112222211.',
-        '..1111111..',
+        '.....1.....',
+        '....121....',
+        '...12.21...',
+        '..12...21..',
+        '...12.21...',
+        '....121....',
+        '.....1.....',
       ],
+      // Athena 2 — Twin Shields
+      [
+        '.111...111.',
+        '12221.12221',
+        '12321.12321',
+        '12221.12221',
+        '.111...111.',
+        '...11111...',
+      ],
+      // Athena 3 — Parthenon
       [
         '11111111111',
-        '1..22.22..1',
-        '1.3.2.2.3.1',
-        '1..22.22..1',
+        '1..1.1.1..1',
+        '1..2.2.2..1',
+        '1..2.3.2..1',
+        '1..2.2.2..1',
+        '1..1.1.1..1',
         '11111111111',
-      ],
-      [
-        '22222.22222',
-        '22111.11122',
-        '11133.33111',
-        '22111.11122',
-        '22222.22222',
       ],
     ],
   },
   {
     name: 'Fortress of Ares',
     sub: 'Sparta',
-    brickNormal: 0xdc2626,
-    brickStrong: 0x991b1b,
-    brickMedusa: 0xf97316,
+    brickNormal: 0xef4444,
+    brickStrong: 0xfb923c,
+    brickMedusa: 0xfbbf24,
     accent: 0xcd7f32,
     bg: 0x1a0808,
     levels: [
+      // Ares 1 — Crossed Blades
       [
-        '2.2.1.1.2.2',
-        '.1.1.1.1.1.',
-        '1.2.3.3.2.1',
-        '.1.1.1.1.1.',
-        '2.2.1.1.2.2',
+        '2...2.2...2',
+        '.2..2.2..2.',
+        '..2.2.2.2..',
+        '...2.3.2...',
+        '..2.2.2.2..',
+        '.2..2.2..2.',
+        '2...2.2...2',
       ],
+      // Ares 2 — Fortress
       [
         '22222222222',
-        '21111111112',
-        '21.33333.12',
-        '21111111112',
+        '21..111..12',
+        '21.1.1.1.12',
+        '21.1.3.1.12',
+        '21.1.1.1.12',
+        '21..111..12',
         '22222222222',
-        '..2222222..',
       ],
+      // Ares 3 — War Drums
       [
-        '22223333222',
-        '32222222223',
-        '32111111123',
-        '32111111123',
-        '32222222223',
-        '22223333222',
+        '33322222333',
+        '32211111223',
+        '32111.11123',
+        '32111.11123',
+        '32211111223',
+        '33322222333',
       ],
     ],
   },
   {
     name: 'Summit of Zeus',
     sub: 'Olympus',
-    brickNormal: 0xeab308,
-    brickStrong: 0xa16207,
-    brickMedusa: 0xd946ef,
+    brickNormal: 0xfde68a,
+    brickStrong: 0xc084fc,
+    brickMedusa: 0xe879f9,
     accent: 0xc084fc,
     bg: 0x1a0f30,
     levels: [
+      // Zeus 1 — Zigzag Storm
       [
-        '2.2.3.3.2.2',
+        '1.1.1.1.1.1',
         '.2.2.2.2.2.',
-        '2.1.3.3.1.2',
+        '..2.2.2.2..',
+        '.3.3.3.3.3.',
+        '..2.2.2.2..',
         '.2.2.2.2.2.',
-        '2.2.3.3.2.2',
+        '1.1.1.1.1.1',
       ],
+      // Zeus 2 — Spiral Tempest
       [
         '22222.22222',
-        '32233.33223',
-        '32231.13223',
-        '32233.33223',
+        '2...2.2...2',
+        '2.33222.3.2',
+        '2.32...32.2',
+        '2.3.22232.2',
+        '2...2.2...2',
         '22222.22222',
-        '..3333333..',
       ],
+      // Zeus 3 — Throne of Olympus
       [
         '33333333333',
-        '33222222233',
-        '32233333223',
-        '32232.23223',
-        '32233333223',
-        '33222222233',
+        '32222222223',
+        '32111111123',
+        '32132.23123',
+        '32111111123',
+        '32222222223',
         '33333333333',
       ],
     ],
@@ -215,7 +256,10 @@ const UPGRADE_POOL = [
 
 // ══════════ AUDIO ════════════════════════════════
 let audioCtx = null
-let bgmState = { key: null, nodes: [] }
+let bgmState = { key: null, nodes: [], intervals: [], allNodes: [] }
+let masterGain = null
+let audioMuted = false
+let safetyCompressor = null
 
 function getAudioCtx() {
   if (audioCtx) {
@@ -225,71 +269,245 @@ function getAudioCtx() {
   const AC = window.AudioContext || window.webkitAudioContext
   if (!AC) return null
   audioCtx = new AC()
+  // Safety compressor/limiter to prevent runaway volume
+  safetyCompressor = audioCtx.createDynamicsCompressor()
+  safetyCompressor.threshold.setValueAtTime(-6, audioCtx.currentTime)
+  safetyCompressor.knee.setValueAtTime(6, audioCtx.currentTime)
+  safetyCompressor.ratio.setValueAtTime(12, audioCtx.currentTime)
+  safetyCompressor.attack.setValueAtTime(0.003, audioCtx.currentTime)
+  safetyCompressor.release.setValueAtTime(0.1, audioCtx.currentTime)
+  safetyCompressor.connect(audioCtx.destination)
+  masterGain = audioCtx.createGain()
+  masterGain.gain.setValueAtTime(1.0, audioCtx.currentTime)
+  masterGain.connect(safetyCompressor)
+  // Restore mute state
+  try { audioMuted = localStorage.getItem('neonOdyssey_mute') === '1' } catch {}
+  if (audioMuted) masterGain.gain.setValueAtTime(0, audioCtx.currentTime)
   return audioCtx
 }
 
+function toggleMute() {
+  audioMuted = !audioMuted
+  try { localStorage.setItem('neonOdyssey_mute', audioMuted ? '1' : '0') } catch {}
+  if (masterGain) {
+    const now = audioCtx.currentTime
+    masterGain.gain.cancelScheduledValues(now)
+    masterGain.gain.setValueAtTime(audioMuted ? 0 : 1, now)
+  }
+  return audioMuted
+}
+
+function getDest() {
+  return masterGain || (audioCtx ? audioCtx.destination : null)
+}
+
+// ── Reverb via feedback delay (lightweight convolver alternative) ──
+function createReverb(ctx, decay = 1.6, mix = 0.18) {
+  const input = ctx.createGain()
+  const wet = ctx.createGain()
+  const dry = ctx.createGain()
+  const delay1 = ctx.createDelay(0.5)
+  const delay2 = ctx.createDelay(0.5)
+  const fb1 = ctx.createGain()
+  const fb2 = ctx.createGain()
+  const filter = ctx.createBiquadFilter()
+
+  delay1.delayTime.value = 0.037
+  delay2.delayTime.value = 0.061
+  fb1.gain.value = Math.min(0.65, decay * 0.32)
+  fb2.gain.value = Math.min(0.60, decay * 0.28)
+  filter.type = 'lowpass'
+  filter.frequency.value = 2200
+  wet.gain.value = mix
+  dry.gain.value = 1 - mix * 0.3
+
+  input.connect(dry)
+  input.connect(delay1)
+  input.connect(delay2)
+  delay1.connect(fb1)
+  fb1.connect(filter)
+  filter.connect(delay1)
+  delay2.connect(fb2)
+  fb2.connect(delay2)
+  delay1.connect(wet)
+  delay2.connect(wet)
+
+  // Return all internal nodes so they can be force-disconnected on cleanup
+  return { input, wet, dry, _internals: [delay1, delay2, fb1, fb2, filter] }
+}
+
 function stopBgm(fade = 0.25) {
-  if (!audioCtx || bgmState.nodes.length === 0) return
+  if (!audioCtx) return
   const now = audioCtx.currentTime
+  // Stop scheduled arpeggios/drums
+  bgmState.intervals.forEach((id) => clearInterval(id))
+
   bgmState.nodes.forEach((nodeSet) => {
     if (nodeSet.gain && nodeSet.gain.gain) {
-      nodeSet.gain.gain.cancelScheduledValues(now)
-      nodeSet.gain.gain.setValueAtTime(Math.max(0.0001, nodeSet.gain.gain.value), now)
-      nodeSet.gain.gain.exponentialRampToValueAtTime(0.0001, now + fade)
+      try {
+        nodeSet.gain.gain.cancelScheduledValues(now)
+        nodeSet.gain.gain.setValueAtTime(Math.max(0.0001, nodeSet.gain.gain.value), now)
+        nodeSet.gain.gain.exponentialRampToValueAtTime(0.0001, now + fade)
+      } catch {}
     }
     if (nodeSet.osc) {
       try { nodeSet.osc.stop(now + fade + 0.05) } catch {}
     }
   })
-  bgmState = { key: null, nodes: [] }
+
+  // Force-disconnect ALL audio nodes after fade to break feedback loops
+  const allNodes = bgmState.allNodes || []
+  setTimeout(() => {
+    allNodes.forEach((node) => {
+      try { node.disconnect() } catch {}
+    })
+  }, (fade + 0.1) * 1000)
+
+  bgmState = { key: null, nodes: [], intervals: [], allNodes: [] }
 }
 
-function bgmPreset(key) {
-  const presets = {
-    menu: {
-      tempo: 6.8,
-      vol: 0.028,
-      tones: [196, 293.66, 392],
-      wave: ['triangle', 'sine', 'sine'],
-      filter: 1700,
-    },
-    'temple-0': {
-      tempo: 5.6,
-      vol: 0.03,
-      tones: [220, 329.63, 493.88],
-      wave: ['triangle', 'sine', 'triangle'],
-      filter: 1900,
-    },
-    'temple-1': {
-      tempo: 5.0,
-      vol: 0.031,
-      tones: [174.61, 261.63, 392],
-      wave: ['sawtooth', 'triangle', 'sine'],
-      filter: 1450,
-    },
-    'temple-2': {
-      tempo: 4.8,
-      vol: 0.032,
-      tones: [246.94, 369.99, 523.25],
-      wave: ['triangle', 'sine', 'square'],
-      filter: 2100,
-    },
-    upgrade: {
-      tempo: 7.8,
-      vol: 0.026,
-      tones: [261.63, 392, 587.33],
-      wave: ['sine', 'triangle', 'sine'],
-      filter: 2200,
-    },
-    victory: {
-      tempo: 8.2,
-      vol: 0.028,
-      tones: [329.63, 493.88, 659.25],
-      wave: ['triangle', 'sine', 'sine'],
-      filter: 2400,
-    },
-  }
-  return presets[key] || presets.menu
+// ── BGM PRESETS — now with chord progressions, arpeggios, and rhythm ──
+const BGM_PRESETS = {
+  menu: {
+    bpm: 68,
+    vol: 0.032,
+    padChords: [
+      [196, 246.94, 329.63],   // G minor
+      [174.61, 220, 293.66],   // F minor
+      [164.81, 207.65, 261.63],// E minor
+      [174.61, 220, 293.66],   // F minor
+    ],
+    padWave: 'triangle',
+    padFilter: 1400,
+    arpNotes: [392, 493.88, 587.33, 493.88, 659.25, 587.33, 493.88, 392],
+    arpWave: 'sine',
+    arpVol: 0.014,
+    arpFilter: 2200,
+    bassNotes: [98, 87.31, 82.41, 87.31],
+    bassWave: 'triangle',
+    bassVol: 0.022,
+    hasDrum: false,
+    reverb: 2.2,
+    reverbMix: 0.25,
+  },
+  'temple-0': {  // Athena — serene, strategic
+    bpm: 76,
+    vol: 0.030,
+    padChords: [
+      [220, 277.18, 329.63],   // A minor
+      [196, 246.94, 293.66],   // G minor
+      [174.61, 220, 261.63],   // F major
+      [196, 246.94, 329.63],   // G sus
+    ],
+    padWave: 'sine',
+    padFilter: 1800,
+    arpNotes: [659.25, 587.33, 493.88, 440, 493.88, 587.33, 659.25, 783.99],
+    arpWave: 'sine',
+    arpVol: 0.012,
+    arpFilter: 2600,
+    bassNotes: [110, 98, 87.31, 98],
+    bassWave: 'triangle',
+    bassVol: 0.020,
+    hasDrum: true,
+    drumVol: 0.016,
+    drumPattern: [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,0,0],  // gentle pulse
+    reverb: 2.0,
+    reverbMix: 0.22,
+  },
+  'temple-1': {  // Ares — aggressive, martial
+    bpm: 96,
+    vol: 0.034,
+    padChords: [
+      [146.83, 174.61, 220],   // D power
+      [130.81, 164.81, 196],   // C power
+      [123.47, 146.83, 185],   // B power
+      [130.81, 164.81, 220],   // C sus
+    ],
+    padWave: 'sawtooth',
+    padFilter: 1200,
+    arpNotes: [293.66, 349.23, 293.66, 261.63, 293.66, 349.23, 392, 349.23],
+    arpWave: 'sawtooth',
+    arpVol: 0.010,
+    arpFilter: 1600,
+    bassNotes: [73.42, 65.41, 61.74, 65.41],
+    bassWave: 'sawtooth',
+    bassVol: 0.026,
+    hasDrum: true,
+    drumVol: 0.028,
+    drumPattern: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,1,1,0],  // driving war drums
+    reverb: 1.0,
+    reverbMix: 0.12,
+  },
+  'temple-2': {  // Zeus — majestic, electric
+    bpm: 84,
+    vol: 0.033,
+    padChords: [
+      [246.94, 311.13, 369.99],  // B major
+      [220, 277.18, 329.63],    // A major
+      [196, 246.94, 293.66],    // G major
+      [220, 277.18, 349.23],    // A7
+    ],
+    padWave: 'triangle',
+    padFilter: 2000,
+    arpNotes: [739.99, 659.25, 587.33, 493.88, 587.33, 659.25, 739.99, 987.77],
+    arpWave: 'triangle',
+    arpVol: 0.013,
+    arpFilter: 3000,
+    bassNotes: [123.47, 110, 98, 110],
+    bassWave: 'triangle',
+    bassVol: 0.022,
+    hasDrum: true,
+    drumVol: 0.022,
+    drumPattern: [1,0,0,1, 0,0,1,0, 1,0,0,1, 0,1,0,0],  // thunder pattern
+    reverb: 2.4,
+    reverbMix: 0.28,
+  },
+  upgrade: {
+    bpm: 62,
+    vol: 0.028,
+    padChords: [
+      [261.63, 329.63, 392],    // C major
+      [293.66, 369.99, 440],    // D major
+      [329.63, 415.30, 493.88], // E major
+      [293.66, 369.99, 440],    // D major
+    ],
+    padWave: 'sine',
+    padFilter: 2400,
+    arpNotes: [523.25, 659.25, 783.99, 659.25, 523.25, 659.25, 783.99, 1046.50],
+    arpWave: 'sine',
+    arpVol: 0.011,
+    arpFilter: 2800,
+    bassNotes: [130.81, 146.83, 164.81, 146.83],
+    bassWave: 'sine',
+    bassVol: 0.016,
+    hasDrum: false,
+    reverb: 3.0,
+    reverbMix: 0.32,
+  },
+  victory: {
+    bpm: 100,
+    vol: 0.034,
+    padChords: [
+      [329.63, 415.30, 493.88],  // E major
+      [349.23, 440, 523.25],     // F major
+      [392, 493.88, 587.33],     // G major
+      [440, 554.37, 659.25],     // A major
+    ],
+    padWave: 'triangle',
+    padFilter: 2800,
+    arpNotes: [659.25, 783.99, 987.77, 783.99, 1046.50, 987.77, 783.99, 659.25],
+    arpWave: 'sine',
+    arpVol: 0.016,
+    arpFilter: 3200,
+    bassNotes: [164.81, 174.61, 196, 220],
+    bassWave: 'triangle',
+    bassVol: 0.022,
+    hasDrum: true,
+    drumVol: 0.020,
+    drumPattern: [1,0,1,0, 1,0,1,1, 1,0,1,0, 1,1,1,1],  // celebratory
+    reverb: 2.0,
+    reverbMix: 0.24,
+  },
 }
 
 function playBgm(key) {
@@ -298,79 +516,427 @@ function playBgm(key) {
   if (bgmState.key === key && bgmState.nodes.length > 0) return
 
   stopBgm(0.2)
-  const preset = bgmPreset(key)
+  const p = BGM_PRESETS[key] || BGM_PRESETS.menu
   const now = ctx.currentTime
-
-  const filter = ctx.createBiquadFilter()
-  filter.type = 'lowpass'
-  filter.frequency.setValueAtTime(preset.filter, now)
-
-  const master = ctx.createGain()
-  master.gain.setValueAtTime(0.0001, now)
-  master.gain.exponentialRampToValueAtTime(preset.vol, now + 0.35)
-  filter.connect(master)
-  master.connect(ctx.destination)
-
+  const dest = getDest()
   const nodes = []
-  preset.tones.forEach((tone, i) => {
+  const intervals = []
+
+  // Create reverb bus
+  const rev = createReverb(ctx, p.reverb, p.reverbMix)
+  rev.wet.connect(dest)
+  rev.dry.connect(dest)
+  // Track ALL reverb sub-nodes for disconnection on stop
+  const allNodes = [rev.input, rev.wet, rev.dry, ...(rev._internals || [])]
+
+  // ── PAD: sustained chord layer with slow chord progression ──
+  const padFilter = ctx.createBiquadFilter()
+  padFilter.type = 'lowpass'
+  padFilter.frequency.setValueAtTime(p.padFilter, now)
+  // Slow filter sweep
+  padFilter.frequency.setValueAtTime(p.padFilter, now)
+
+  const padGain = ctx.createGain()
+  padGain.gain.setValueAtTime(0.0001, now)
+  padGain.gain.exponentialRampToValueAtTime(p.vol, now + 1.2)
+  padFilter.connect(padGain)
+  padGain.connect(rev.input)
+
+  // Create pad oscillators (will morph through chords)
+  const padOscs = p.padChords[0].map((freq, i) => {
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
-    const lfo = ctx.createOscillator()
-    const lfoGain = ctx.createGain()
-
-    osc.type = preset.wave[i] || 'sine'
-    osc.frequency.setValueAtTime(tone, now)
-
-    gain.gain.setValueAtTime(0.0001, now)
-    const targetGain = preset.vol * (i === 0 ? 0.62 : i === 1 ? 0.46 : 0.28)
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, targetGain), now + 0.42)
-
-    lfo.type = 'sine'
-    lfo.frequency.setValueAtTime(1 / (preset.tempo + i * 0.7), now)
-    lfoGain.gain.setValueAtTime(tone * (0.008 + i * 0.002), now)
-
-    lfo.connect(lfoGain)
-    lfoGain.connect(osc.frequency)
-
+    osc.type = p.padWave
+    osc.frequency.setValueAtTime(freq, now)
+    const layerVol = i === 0 ? 0.45 : i === 1 ? 0.35 : 0.25
+    gain.gain.setValueAtTime(layerVol, now)
     osc.connect(gain)
-    gain.connect(filter)
+    gain.connect(padFilter)
 
+    // Vibrato
+    const vib = ctx.createOscillator()
+    const vibGain = ctx.createGain()
+    vib.type = 'sine'
+    vib.frequency.setValueAtTime(4.2 + i * 0.3, now)
+    vibGain.gain.setValueAtTime(freq * 0.005, now)
+    vib.connect(vibGain)
+    vibGain.connect(osc.frequency)
+    vib.start(now)
     osc.start(now)
-    lfo.start(now)
 
     nodes.push({ osc, gain })
-    nodes.push({ osc: lfo, gain: lfoGain })
+    nodes.push({ osc: vib, gain: vibGain })
+    allNodes.push(osc, gain, vib, vibGain)
+    return osc
   })
 
-  const pulse = ctx.createOscillator()
-  const pulseGain = ctx.createGain()
-  pulse.type = 'sine'
-  pulse.frequency.setValueAtTime(1 / preset.tempo, now)
-  pulseGain.gain.setValueAtTime(0.006, now)
-  pulse.connect(pulseGain)
-  pulseGain.connect(master.gain)
-  pulse.start(now)
-  nodes.push({ osc: pulse, gain: pulseGain })
+  // Chord progression schedule
+  const beatDur = 60 / p.bpm
+  const barDur = beatDur * 4
+  let chordIdx = 0
+  const chordInterval = setInterval(() => {
+    if (!audioCtx || bgmState.key !== key) { clearInterval(chordInterval); return }
+    chordIdx = (chordIdx + 1) % p.padChords.length
+    const chord = p.padChords[chordIdx]
+    const t = audioCtx.currentTime
+    padOscs.forEach((osc, i) => {
+      if (chord[i]) {
+        osc.frequency.cancelScheduledValues(t)
+        osc.frequency.setValueAtTime(osc.frequency.value, t)
+        osc.frequency.exponentialRampToValueAtTime(chord[i], t + beatDur * 0.5)
+      }
+    })
+    // Filter movement on chord change
+    padFilter.frequency.cancelScheduledValues(t)
+    padFilter.frequency.setValueAtTime(padFilter.frequency.value, t)
+    padFilter.frequency.linearRampToValueAtTime(
+      p.padFilter + (chordIdx % 2 === 0 ? 200 : -100), t + barDur * 0.8
+    )
+  }, barDur * 1000)
+  intervals.push(chordInterval)
 
-  bgmState = { key, nodes }
+  // ── ARP: rhythmic melodic layer ──
+  const arpFilter = ctx.createBiquadFilter()
+  arpFilter.type = 'lowpass'
+  arpFilter.frequency.setValueAtTime(p.arpFilter, now)
+  arpFilter.connect(rev.input)
+
+  let arpStep = 0
+  const arpInterval = setInterval(() => {
+    if (!audioCtx || bgmState.key !== key) { clearInterval(arpInterval); return }
+    const t = audioCtx.currentTime
+    const note = p.arpNotes[arpStep % p.arpNotes.length]
+    arpStep++
+
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = p.arpWave
+    osc.frequency.setValueAtTime(note, t)
+
+    // ADSR envelope
+    gain.gain.setValueAtTime(0.0001, t)
+    gain.gain.exponentialRampToValueAtTime(p.arpVol, t + 0.012)
+    gain.gain.exponentialRampToValueAtTime(p.arpVol * 0.6, t + 0.06)
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + beatDur * 0.85)
+
+    osc.connect(gain)
+    gain.connect(arpFilter)
+    osc.start(t)
+    osc.stop(t + beatDur)
+  }, beatDur * 1000 * 0.5)  // eighth notes
+  intervals.push(arpInterval)
+
+  // ── BASS: root note foundation ──
+  const bassFilter = ctx.createBiquadFilter()
+  bassFilter.type = 'lowpass'
+  bassFilter.frequency.setValueAtTime(400, now)
+  const bassGain = ctx.createGain()
+  bassGain.gain.setValueAtTime(0.0001, now)
+  bassGain.gain.exponentialRampToValueAtTime(p.bassVol, now + 0.8)
+  bassFilter.connect(bassGain)
+  bassGain.connect(dest)
+
+  const bassOsc = ctx.createOscillator()
+  bassOsc.type = p.bassWave
+  bassOsc.frequency.setValueAtTime(p.bassNotes[0], now)
+  bassOsc.connect(bassFilter)
+  bassOsc.start(now)
+  nodes.push({ osc: bassOsc, gain: bassGain })
+  allNodes.push(bassOsc)
+
+  let bassIdx = 0
+  const bassInterval = setInterval(() => {
+    if (!audioCtx || bgmState.key !== key) { clearInterval(bassInterval); return }
+    bassIdx = (bassIdx + 1) % p.bassNotes.length
+    const t = audioCtx.currentTime
+    bassOsc.frequency.cancelScheduledValues(t)
+    bassOsc.frequency.setValueAtTime(bassOsc.frequency.value, t)
+    bassOsc.frequency.exponentialRampToValueAtTime(p.bassNotes[bassIdx], t + 0.15)
+  }, barDur * 1000)
+  intervals.push(bassInterval)
+
+  // ── DRUMS: noise-based percussive hits ──
+  if (p.hasDrum && p.drumPattern) {
+    let drumStep = 0
+    const sixteenthDur = beatDur * 0.25
+    const drumInterval = setInterval(() => {
+      if (!audioCtx || bgmState.key !== key) { clearInterval(drumInterval); return }
+      const hit = p.drumPattern[drumStep % p.drumPattern.length]
+      drumStep++
+      if (!hit) return
+
+      const t = audioCtx.currentTime
+      // Noise burst (kick/tom feel)
+      const bufferSize = ctx.sampleRate * 0.06
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
+      const data = buffer.getChannelData(0)
+      for (let s = 0; s < bufferSize; s++) {
+        data[s] = (Math.random() * 2 - 1) * Math.pow(1 - s / bufferSize, 3)
+      }
+      const noise = ctx.createBufferSource()
+      noise.buffer = buffer
+
+      const drumFilter = ctx.createBiquadFilter()
+      drumFilter.type = 'lowpass'
+      drumFilter.frequency.setValueAtTime(300, t)
+      drumFilter.frequency.exponentialRampToValueAtTime(80, t + 0.05)
+
+      const drumGain = ctx.createGain()
+      drumGain.gain.setValueAtTime(p.drumVol, t)
+      drumGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08)
+
+      noise.connect(drumFilter)
+      drumFilter.connect(drumGain)
+      drumGain.connect(dest)
+      noise.start(t)
+      noise.stop(t + 0.1)
+
+      // Tonal body
+      const toneOsc = ctx.createOscillator()
+      const toneGain = ctx.createGain()
+      toneOsc.type = 'sine'
+      toneOsc.frequency.setValueAtTime(80, t)
+      toneOsc.frequency.exponentialRampToValueAtTime(40, t + 0.06)
+      toneGain.gain.setValueAtTime(p.drumVol * 0.7, t)
+      toneGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08)
+      toneOsc.connect(toneGain)
+      toneGain.connect(dest)
+      toneOsc.start(t)
+      toneOsc.stop(t + 0.1)
+    }, sixteenthDur * 1000)
+    intervals.push(drumInterval)
+  }
+
+  nodes.push({ gain: padGain })
+  // Also track filters and gains for full disconnection
+  allNodes.push(padFilter, padGain, arpFilter, bassFilter, bassGain)
+  bgmState = { key, nodes, intervals, allNodes }
 }
 
+// ── RICH SFX SYSTEM ─────────────────────────────
 function sfx(freq = 440, freqEnd = null, dur = 0.08, vol = 0.055, type = 'sine') {
   const ctx = getAudioCtx()
   if (!ctx) return
+  const dest = getDest()
   const now = ctx.currentTime
+
+  // Primary tone
   const osc = ctx.createOscillator()
   const gain = ctx.createGain()
   osc.type = type
   osc.frequency.setValueAtTime(freq, now)
   if (freqEnd) osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), now + dur)
-  gain.gain.setValueAtTime(0.001, now)
-  gain.gain.exponentialRampToValueAtTime(vol, now + 0.008)
-  gain.gain.exponentialRampToValueAtTime(0.001, now + dur)
+
+  // Proper ADSR envelope
+  const attack = Math.min(dur * 0.1, 0.012)
+  const decay = Math.min(dur * 0.2, 0.05)
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(vol, now + attack)
+  gain.gain.exponentialRampToValueAtTime(vol * 0.6, now + attack + decay)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + dur)
+
+  // Sub-harmonic for body (on lower-freq sounds)
+  if (freq < 500 && dur > 0.05) {
+    const sub = ctx.createOscillator()
+    const subGain = ctx.createGain()
+    sub.type = 'sine'
+    sub.frequency.setValueAtTime(freq * 0.5, now)
+    if (freqEnd) sub.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd * 0.5), now + dur)
+    subGain.gain.setValueAtTime(0.0001, now)
+    subGain.gain.exponentialRampToValueAtTime(vol * 0.3, now + attack)
+    subGain.gain.exponentialRampToValueAtTime(0.0001, now + dur)
+    sub.connect(subGain)
+    subGain.connect(dest)
+    sub.start(now)
+    sub.stop(now + dur + 0.02)
+  }
+
+  // Noise transient for impact feel (on percussive/short sfx)
+  if (dur < 0.15 && vol > 0.03) {
+    const bufSize = Math.floor(ctx.sampleRate * 0.02)
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate)
+    const d = buf.getChannelData(0)
+    for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 6)
+    const ns = ctx.createBufferSource()
+    ns.buffer = buf
+    const nsGain = ctx.createGain()
+    nsGain.gain.setValueAtTime(vol * 0.2, now)
+    nsGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02)
+    const nsFilter = ctx.createBiquadFilter()
+    nsFilter.type = 'highpass'
+    nsFilter.frequency.setValueAtTime(Math.min(freq * 2, 8000), now)
+    ns.connect(nsFilter)
+    nsFilter.connect(nsGain)
+    nsGain.connect(dest)
+    ns.start(now)
+    ns.stop(now + 0.025)
+  }
+
+  // Harmonic overtone for brightness
+  if (freq > 200 && type !== 'sawtooth') {
+    const harm = ctx.createOscillator()
+    const harmGain = ctx.createGain()
+    harm.type = 'sine'
+    harm.frequency.setValueAtTime(freq * 2, now)
+    if (freqEnd) harm.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd * 2), now + dur)
+    harmGain.gain.setValueAtTime(0.0001, now)
+    harmGain.gain.exponentialRampToValueAtTime(vol * 0.12, now + attack)
+    harmGain.gain.exponentialRampToValueAtTime(0.0001, now + dur * 0.7)
+    harm.connect(harmGain)
+    harmGain.connect(dest)
+    harm.start(now)
+    harm.stop(now + dur + 0.02)
+  }
+
   osc.connect(gain)
-  gain.connect(ctx.destination)
+  gain.connect(dest)
   osc.start(now)
   osc.stop(now + dur + 0.02)
+}
+
+// ── Named SFX helpers for specific game events ──
+function sfxComboMilestone(tier) {
+  const ctx = getAudioCtx()
+  if (!ctx) return
+  const dest = getDest()
+  const now = ctx.currentTime
+  const baseFreq = tier === 1 ? 700 : tier === 2 ? 860 : 1050
+  // Ascending arpeggio burst
+  for (let i = 0; i < 3; i++) {
+    const osc = ctx.createOscillator()
+    const g = ctx.createGain()
+    osc.type = 'triangle'
+    osc.frequency.setValueAtTime(baseFreq + i * 120, now + i * 0.04)
+    g.gain.setValueAtTime(0.0001, now + i * 0.04)
+    g.gain.exponentialRampToValueAtTime(0.04, now + i * 0.04 + 0.01)
+    g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.04 + 0.15)
+    osc.connect(g)
+    g.connect(dest)
+    osc.start(now + i * 0.04)
+    osc.stop(now + i * 0.04 + 0.18)
+  }
+}
+
+function sfxPowerup() {
+  const ctx = getAudioCtx()
+  if (!ctx) return
+  const dest = getDest()
+  const now = ctx.currentTime
+  // Shimmering collect sound — rapid ascending notes + sparkle noise
+  const notes = [680, 780, 920, 1040, 1200]
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator()
+    const g = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(freq, now + i * 0.028)
+    g.gain.setValueAtTime(0.0001, now + i * 0.028)
+    g.gain.exponentialRampToValueAtTime(0.045, now + i * 0.028 + 0.008)
+    g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.028 + 0.1)
+    osc.connect(g)
+    g.connect(dest)
+    osc.start(now + i * 0.028)
+    osc.stop(now + i * 0.028 + 0.12)
+  })
+  // Sparkle noise tail
+  const bufSize = Math.floor(ctx.sampleRate * 0.08)
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate)
+  const d = buf.getChannelData(0)
+  for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 4)
+  const ns = ctx.createBufferSource()
+  ns.buffer = buf
+  const nsg = ctx.createGain()
+  const nsf = ctx.createBiquadFilter()
+  nsf.type = 'bandpass'
+  nsf.frequency.setValueAtTime(4000, now)
+  nsf.Q.setValueAtTime(2, now)
+  nsg.gain.setValueAtTime(0.03, now + 0.06)
+  nsg.gain.exponentialRampToValueAtTime(0.0001, now + 0.18)
+  ns.connect(nsf)
+  nsf.connect(nsg)
+  nsg.connect(dest)
+  ns.start(now + 0.06)
+  ns.stop(now + 0.2)
+}
+
+function sfxLevelComplete() {
+  const ctx = getAudioCtx()
+  if (!ctx) return
+  const dest = getDest()
+  const now = ctx.currentTime
+  // Triumphant ascending fanfare
+  const notes = [440, 523.25, 659.25, 783.99, 880]
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator()
+    const g = ctx.createGain()
+    osc.type = 'triangle'
+    osc.frequency.setValueAtTime(freq, now + i * 0.09)
+    g.gain.setValueAtTime(0.0001, now + i * 0.09)
+    g.gain.exponentialRampToValueAtTime(0.06, now + i * 0.09 + 0.015)
+    g.gain.exponentialRampToValueAtTime(0.03, now + i * 0.09 + 0.08)
+    g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.09 + 0.4)
+    osc.connect(g)
+    g.connect(dest)
+    osc.start(now + i * 0.09)
+    osc.stop(now + i * 0.09 + 0.45)
+  })
+  // Sustain chord on top
+  const chordFreqs = [659.25, 783.99, 987.77]
+  chordFreqs.forEach((freq) => {
+    const osc = ctx.createOscillator()
+    const g = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(freq, now + 0.45)
+    g.gain.setValueAtTime(0.0001, now + 0.45)
+    g.gain.exponentialRampToValueAtTime(0.035, now + 0.52)
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 1.5)
+    osc.connect(g)
+    g.connect(dest)
+    osc.start(now + 0.45)
+    osc.stop(now + 1.55)
+  })
+}
+
+function sfxGameOver() {
+  const ctx = getAudioCtx()
+  if (!ctx) return
+  const dest = getDest()
+  const now = ctx.currentTime
+  // Descending ominous rumble
+  const osc = ctx.createOscillator()
+  const g = ctx.createGain()
+  osc.type = 'sawtooth'
+  osc.frequency.setValueAtTime(260, now)
+  osc.frequency.exponentialRampToValueAtTime(50, now + 0.6)
+  g.gain.setValueAtTime(0.0001, now)
+  g.gain.exponentialRampToValueAtTime(0.06, now + 0.03)
+  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.8)
+  const filt = ctx.createBiquadFilter()
+  filt.type = 'lowpass'
+  filt.frequency.setValueAtTime(800, now)
+  filt.frequency.exponentialRampToValueAtTime(100, now + 0.6)
+  osc.connect(filt)
+  filt.connect(g)
+  g.connect(dest)
+  osc.start(now)
+  osc.stop(now + 0.85)
+  // Noise crash
+  const bufSize = Math.floor(ctx.sampleRate * 0.3)
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate)
+  const d = buf.getChannelData(0)
+  for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 2)
+  const ns = ctx.createBufferSource()
+  ns.buffer = buf
+  const nsg = ctx.createGain()
+  nsg.gain.setValueAtTime(0.04, now)
+  nsg.gain.exponentialRampToValueAtTime(0.0001, now + 0.5)
+  const nsf = ctx.createBiquadFilter()
+  nsf.type = 'lowpass'
+  nsf.frequency.setValueAtTime(600, now)
+  ns.connect(nsf)
+  nsf.connect(nsg)
+  nsg.connect(dest)
+  ns.start(now)
+  ns.stop(now + 0.5)
 }
 
 function drawTempleSigil(scene, x, y, templeIdx, color, depth = 1, alpha = 0.22, scale = 1) {
@@ -618,19 +1184,7 @@ class MenuScene extends Phaser.Scene {
   }
 
   create() {
-    const r = this.registry
-    r.set('score', 0)
-    r.set('lives', 3)
-    r.set('templeIdx', 0)
-    r.set('levelIdx', 0)
-    r.set('paddleW', 140)
-    r.set('ballSpd', 320)
-    r.set('dropRate', 18)
-    r.set('comboBon', 1)
-    r.set('lastIntroTemple', -1)
-    r.set('onboardingDone', false)
-    r.set('mode', 'pro')
-
+    this.selectedDifficulty = 'normal'
     this.cameras.main.setBackgroundColor(C.bg)
     playBgm('menu')
 
@@ -649,7 +1203,7 @@ class MenuScene extends Phaser.Scene {
     this.drawColumn(W - 55)
 
     const title = this.add
-      .text(W / 2, H * 0.25, 'NEON ODYSSEY', {
+      .text(W / 2, H * 0.17, 'NEON ODYSSEY', {
         fontFamily: 'Cinzel, serif',
         fontSize: '74px',
         color: '#fbbf24',
@@ -659,7 +1213,7 @@ class MenuScene extends Phaser.Scene {
       .setOrigin(0.5)
 
     const titleGlow = this.add
-      .text(W / 2, H * 0.25, 'NEON ODYSSEY', {
+      .text(W / 2, H * 0.17, 'NEON ODYSSEY', {
         fontFamily: 'Cinzel, serif',
         fontSize: '74px',
         color: '#fde68a',
@@ -686,103 +1240,197 @@ class MenuScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     })
 
-    const tagline = this.add
-      .text(W / 2, H * 0.32, 'Deflect destiny. Conquer Olympus.', {
-        fontFamily: 'system-ui',
-        fontSize: '18px',
-        color: '#cbd5e1',
+    this.add
+      .text(W / 2, H * 0.25, 'Deflect destiny. Conquer Olympus.', {
+        fontFamily: 'system-ui', fontSize: '17px', color: '#cbd5e1',
       })
       .setOrigin(0.5)
       .setShadow(0, 1, '#000000', 0.75, false, true)
-      .setAlpha(0)
 
-    const subtitle = this.add
-      .text(W / 2, H * 0.38, 'A Greek Mythology Brick Breaker', {
-        fontFamily: 'Cinzel, serif',
-        fontSize: '22px',
-        color: '#94a3b8',
-      })
-      .setOrigin(0.5)
-      .setShadow(0, 1, '#000000', 0.75, false, true)
-      .setAlpha(0)
-
-    const featureLine = this.add
-      .text(W / 2, H * 0.48, '⚡  3 Temples · 9 Levels · 4 God Powers  ⚡', {
-        fontFamily: 'system-ui',
-        fontSize: '18px',
-        color: '#7dd3fc',
+    this.add
+      .text(W / 2, H * 0.30, '⚡  3 Temples · 9 Levels · 5 God Powers  ⚡', {
+        fontFamily: 'system-ui', fontSize: '16px', color: '#7dd3fc',
       })
       .setOrigin(0.5)
       .setShadow(0, 1, '#000000', 0.8, false, true)
-      .setAlpha(0)
 
-    // Hi-score display
+    // ── Difficulty selector ─────────────────────
+    this.add.text(W / 2, H * 0.38, 'Choose Your Fate', {
+      fontFamily: 'Cinzel, serif', fontSize: '20px', color: '#94a3b8',
+    }).setOrigin(0.5).setShadow(0, 1, '#000000', 0.8, false, true)
+
+    const diffKeys = ['easy', 'normal', 'hard']
+    const diffColors = ['#4ade80', '#38bdf8', '#ef4444']
+    this.diffCards = []
+    this.diffHighlights = []
+
+    diffKeys.forEach((key, i) => {
+      const d = DIFFICULTY[key]
+      const cx = W / 2 - 180 + i * 180
+      const cy = H * 0.47
+
+      const bg = this.add.rectangle(cx, cy, 160, 62, 0x0b1227, 0.85)
+        .setStrokeStyle(2, key === 'normal' ? C.neonCyan : 0x334155, 0.7)
+        .setDepth(2).setInteractive({ useHandCursor: true })
+      const hl = this.add.rectangle(cx, cy, 166, 68, C.neonCyan, 0)
+        .setDepth(1)
+
+      this.add.text(cx, cy - 14, d.label, {
+        fontFamily: 'Cinzel, serif', fontSize: '18px', color: diffColors[i],
+      }).setOrigin(0.5).setDepth(3)
+      this.add.text(cx, cy + 12, d.desc, {
+        fontFamily: 'system-ui', fontSize: '12px', color: '#94a3b8',
+      }).setOrigin(0.5).setDepth(3)
+
+      this.diffCards.push(bg)
+      this.diffHighlights.push(hl)
+
+      bg.on('pointerover', () => bg.setStrokeStyle(2, C.gold, 1))
+      bg.on('pointerout', () => {
+        bg.setStrokeStyle(2, this.selectedDifficulty === key ? C.neonCyan : 0x334155, 0.7)
+      })
+      bg.on('pointerdown', (pointer, lx, ly, event) => {
+        event.stopPropagation()
+        this.selectedDifficulty = key
+        this.updateDiffSelection()
+        sfx(500 + i * 100, 700 + i * 100, 0.06, 0.03, 'triangle')
+      })
+    })
+    this.updateDiffSelection()
+
+    // ── Hi-score ────────────────────────────────
     const hi = getHiScore()
     if (hi > 0) {
-      this.add.text(W / 2, H * 0.55, `🏆 Best: ${hi}`, {
-        fontFamily: 'system-ui', fontSize: '20px', color: '#fbbf24',
+      this.add.text(W / 2, H * 0.56, `🏆 Best: ${hi}`, {
+        fontFamily: 'system-ui', fontSize: '18px', color: '#fbbf24',
       }).setOrigin(0.5)
     }
 
-    const start = this.add
-      .text(W / 2, H * 0.65, '[ Press SPACE or Click to Begin ]', {
-        fontFamily: 'system-ui',
-        fontSize: '24px',
-        color: '#e2e8f0',
-      })
-      .setOrigin(0.5)
+    // ── New Game button ─────────────────────────
+    const newBtn = this.add.text(W / 2, H * 0.65, '▶  NEW GAME', {
+      fontFamily: 'Cinzel, serif', fontSize: '26px', color: '#e2e8f0',
+      backgroundColor: '#1e293b', padding: { x: 32, y: 10 },
+    }).setOrigin(0.5).setDepth(2).setInteractive({ useHandCursor: true })
       .setShadow(0, 2, '#000000', 0.9, false, true)
-      .setAlpha(0)
 
-    this.tweens.add({ targets: [tagline, subtitle], alpha: 1, duration: 500, delay: 120 })
-    this.tweens.add({ targets: featureLine, alpha: 1, duration: 500, delay: 260 })
-    this.tweens.add({ targets: start, alpha: 1, duration: 500, delay: 420 })
-
-    this.tweens.add({
-      targets: start,
-      alpha: { from: 1, to: 0.25 },
-      duration: 900,
-      yoyo: true,
-      repeat: -1,
+    newBtn.on('pointerover', () => newBtn.setColor('#fbbf24'))
+    newBtn.on('pointerout', () => newBtn.setColor('#e2e8f0'))
+    newBtn.on('pointerdown', () => {
+      getAudioCtx()
+      playBgm('menu')
+      clearProgress()
+      this.startGame(true)
     })
 
+    this.tweens.add({
+      targets: newBtn, alpha: { from: 1, to: 0.55 },
+      duration: 1100, yoyo: true, repeat: -1,
+    })
+
+    // ── Continue button (if save exists) ────────
+    const save = loadProgress()
+    if (save) {
+      const templeNames = ['Athena', 'Ares', 'Zeus']
+      const lvl = (save.templeIdx || 0) * 3 + (save.levelIdx || 0) + 1
+      const contBtn = this.add.text(W / 2, H * 0.74, `↩  CONTINUE  (${templeNames[save.templeIdx || 0]} Lv${lvl})`, {
+        fontFamily: 'system-ui', fontSize: '18px', color: '#93c5fd',
+        backgroundColor: '#0f172a', padding: { x: 20, y: 8 },
+      }).setOrigin(0.5).setDepth(2).setInteractive({ useHandCursor: true })
+        .setShadow(0, 1, '#000000', 0.8, false, true)
+
+      contBtn.on('pointerover', () => contBtn.setColor('#fbbf24'))
+      contBtn.on('pointerout', () => contBtn.setColor('#93c5fd'))
+      contBtn.on('pointerdown', () => {
+        getAudioCtx()
+        this.startGame(false, save)
+      })
+    }
+
+    // ── Controls + credits ──────────────────────
     this.add
-      .text(W / 2, H * 0.78, 'Controls:  ← → Move  |  Space Launch  |  P Pause  |  R Restart', {
-        fontFamily: 'system-ui',
-        fontSize: '14px',
-        color: '#64748b',
+      .text(W / 2, H * 0.85, 'Controls:  ← → or Touch  |  Space/Tap Launch  |  P Pause  |  R Restart', {
+        fontFamily: 'system-ui', fontSize: '13px', color: '#64748b',
       })
       .setOrigin(0.5)
       .setShadow(0, 1, '#000000', 0.8, false, true)
 
     this.add
-      .text(W / 2, H * 0.86, 'Z01 Athens Jam · Built with Phaser 3 + AI', {
-        fontFamily: 'system-ui',
-        fontSize: '13px',
-        color: '#475569',
+      .text(W / 2, H * 0.91, 'Z01 Athens Jam · Built with Phaser 3 + AI', {
+        fontFamily: 'system-ui', fontSize: '12px', color: '#475569',
       })
       .setOrigin(0.5)
       .setShadow(0, 1, '#000000', 0.8, false, true)
 
     this.add
       .text(W - 14, H - 10, `Build ${BUILD_ID}`, {
-        fontFamily: 'system-ui',
-        fontSize: '11px',
-        color: '#334155',
+        fontFamily: 'system-ui', fontSize: '11px', color: '#334155',
       })
       .setOrigin(1, 1)
       .setShadow(0, 1, '#000000', 0.75, false, true)
 
+    // ── Mute toggle button ──────────────────────
+    this.muteBtn = this.add.text(14, H - 10, audioMuted ? '🔇' : '🔊', {
+      fontSize: '22px',
+    }).setOrigin(0, 1).setInteractive({ useHandCursor: true }).setAlpha(0.7)
+    this.muteBtn.on('pointerdown', (pointer, lx, ly, event) => {
+      event.stopPropagation()
+      const muted = toggleMute()
+      this.muteBtn.setText(muted ? '🔇' : '🔊')
+    })
+
+    // Keyboard start
     this.input.keyboard.once('keydown-SPACE', () => {
       getAudioCtx()
       playBgm('menu')
-      this.go()
+      clearProgress()
+      this.startGame(true)
     })
-    this.input.once('pointerdown', () => {
-      getAudioCtx()
-      playBgm('menu')
-      this.go()
+  }
+
+  updateDiffSelection() {
+    const keys = ['easy', 'normal', 'hard']
+    keys.forEach((key, i) => {
+      const selected = this.selectedDifficulty === key
+      this.diffCards[i].setStrokeStyle(2, selected ? C.neonCyan : 0x334155, selected ? 1 : 0.5)
+      this.diffHighlights[i].setAlpha(selected ? 0.08 : 0)
     })
+  }
+
+  startGame(newGame, save = null) {
+    const r = this.registry
+    const diff = DIFFICULTY[this.selectedDifficulty] || DIFFICULTY.normal
+
+    if (newGame || !save) {
+      r.set('score', 0)
+      r.set('lives', diff.lives)
+      r.set('templeIdx', 0)
+      r.set('levelIdx', 0)
+      r.set('paddleW', diff.paddleW)
+      r.set('ballSpd', diff.ballSpd)
+      r.set('dropRate', diff.dropRate)
+      r.set('comboBon', 1)
+      r.set('lastIntroTemple', -1)
+      r.set('onboardingDone', false)
+      r.set('mode', this.selectedDifficulty === 'hard' ? 'pro' : 'classic')
+      r.set('difficulty', this.selectedDifficulty)
+    } else {
+      r.set('score', save.score || 0)
+      r.set('lives', save.lives || diff.lives)
+      r.set('templeIdx', save.templeIdx || 0)
+      r.set('levelIdx', save.levelIdx || 0)
+      r.set('paddleW', save.paddleW || diff.paddleW)
+      r.set('ballSpd', save.ballSpd || diff.ballSpd)
+      r.set('dropRate', save.dropRate || diff.dropRate)
+      r.set('comboBon', save.comboBon || 1)
+      r.set('lastIntroTemple', -1)
+      r.set('onboardingDone', true)
+      r.set('mode', save.mode || 'classic')
+      r.set('difficulty', save.difficulty || 'normal')
+    }
+
+    sfx(440, 880, 0.15, 0.05, 'triangle')
+    this.cameras.main.fadeOut(350)
+    this.time.delayedCall(350, () => this.scene.start('GameScene'))
   }
 
   drawColumn(x) {
@@ -797,12 +1445,6 @@ class MenuScene extends Phaser.Scene {
       g.fillRect(x - 10, y, 4, 18)
       g.fillRect(x + 6, y, 4, 18)
     }
-  }
-
-  go() {
-    sfx(440, 880, 0.15, 0.05, 'triangle')
-    this.cameras.main.fadeOut(350)
-    this.time.delayedCall(350, () => this.scene.start('GameScene'))
   }
 
   update(_, delta) {
@@ -875,6 +1517,23 @@ class GameScene extends Phaser.Scene {
     this.loadLevel()
     this.spawnBall(true)
 
+    // ── Paddle glow effect ──────────────────────
+    this.paddleGlow = this.add.ellipse(
+      this.paddle.x, PADDLE_Y + 8,
+      this.basePaddleWidth * 1.2, 18,
+      this.temple.accent, 0.18
+    ).setDepth(4).setBlendMode(Phaser.BlendModes.SCREEN)
+
+    this.paddleGlowPulse = this.tweens.add({
+      targets: this.paddleGlow,
+      alpha: { from: 0.12, to: 0.28 },
+      scaleX: { from: 1, to: 1.08 },
+      duration: 1200,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    })
+
     if (this.levelIdx === 0 && this.registry.get('lastIntroTemple') !== this.templeIdx) {
       this.showTempleIntro()
       this.registry.set('lastIntroTemple', this.templeIdx)
@@ -911,17 +1570,17 @@ class GameScene extends Phaser.Scene {
       g.strokeRoundedRect(1, 1, pw - 2, 18, 9)
     })
 
-    gen('ball', 18, 18, (g) => {
-      g.fillStyle(C.neonCyan, 0.2)
-      g.fillCircle(9, 9, 9)
-      g.fillStyle(C.neonCyan, 0.2)
-      g.fillCircle(9, 9, 8)
+    gen('ball', 24, 24, (g) => {
+      g.fillStyle(C.neonCyan, 0.12)
+      g.fillCircle(12, 12, 12)
+      g.fillStyle(C.neonCyan, 0.18)
+      g.fillCircle(12, 12, 11)
       g.fillStyle(C.white, 0.98)
-      g.fillCircle(9, 9, 7)
-      g.fillStyle(C.neonCyan, 0.5)
-      g.fillCircle(9, 9, 3)
-      g.fillStyle(0xffffff, 0.7)
-      g.fillCircle(6, 6, 2)
+      g.fillCircle(12, 12, 9)
+      g.fillStyle(C.neonCyan, 0.55)
+      g.fillCircle(12, 12, 4)
+      g.fillStyle(0xffffff, 0.8)
+      g.fillCircle(8, 8, 3)
     })
 
     gen('brick1', BRICK_W, BRICK_H, (g) => {
@@ -938,13 +1597,13 @@ class GameScene extends Phaser.Scene {
     gen('brick2', BRICK_W, BRICK_H, (g) => {
       g.fillStyle(t.brickStrong, 1)
       g.fillRoundedRect(0, 0, BRICK_W, BRICK_H, 4)
-      g.fillStyle(0xffffff, 0.14)
+      g.fillStyle(0xffffff, 0.18)
       g.fillRoundedRect(3, 2, BRICK_W - 6, 10, 3)
-      g.lineStyle(1, 0xffffff, 0.18)
-      g.lineBetween(10, BRICK_H / 2, BRICK_W - 10, BRICK_H / 2)
       g.lineStyle(1, 0xffffff, 0.22)
+      g.lineBetween(10, BRICK_H / 2, BRICK_W - 10, BRICK_H / 2)
+      g.lineStyle(2, 0xffffff, 0.35)
       g.strokeRoundedRect(1, 1, BRICK_W - 2, BRICK_H - 2, 4)
-      g.fillStyle(0xffffff, 0.08)
+      g.fillStyle(0xffffff, 0.12)
       g.fillCircle(BRICK_W / 2, BRICK_H / 2, 3)
     })
 
@@ -1092,9 +1751,20 @@ class GameScene extends Phaser.Scene {
     this.keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
     this.keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R)
     this.keyP = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P)
-    this.input.on('pointerdown', () => {
+
+    // ── Touch / pointer paddle control ──────────
+    this.pointerControlX = null
+    this.input.on('pointermove', (pointer) => {
+      this.pointerControlX = pointer.x
+    })
+    this.input.on('pointerdown', (pointer) => {
       getAudioCtx()
-      if (this.paused) return
+      this.pointerControlX = pointer.x
+      if (this.paused) {
+        // Tap to unpause
+        this.togglePause()
+        return
+      }
       this.launchBall()
     })
 
@@ -1110,9 +1780,48 @@ class GameScene extends Phaser.Scene {
       fontFamily: 'Cinzel, serif', fontSize: '52px', color: '#fbbf24',
       stroke: '#7c3aed', strokeThickness: 3,
     }).setOrigin(0.5).setDepth(51).setVisible(false)
-    this.pauseSub = this.add.text(W / 2, H / 2 + 40, 'Press P to resume', {
+    this.pauseSub = this.add.text(W / 2, H / 2 + 40, 'Press P or tap to resume', {
       fontFamily: 'system-ui', fontSize: '18px', color: '#94a3b8',
     }).setOrigin(0.5).setDepth(51).setVisible(false)
+
+    // On-screen pause button (visible, good for mobile)
+    this.pauseBtn = this.add.text(W - 20, 64, '⏸', {
+      fontSize: '28px', backgroundColor: '#1118', padding: { x: 6, y: 2 },
+    }).setOrigin(1, 0).setDepth(12).setInteractive({ useHandCursor: true }).setAlpha(0.85)
+    this.pauseBtn.on('pointerdown', (pointer, lx, ly, event) => {
+      event.stopPropagation()
+      this.togglePause()
+    })
+
+    // ── Mute toggle button (in-game) ────────────
+    this.muteBtn = this.add.text(W - 52, 64, audioMuted ? '🔇' : '🔊', {
+      fontSize: '26px', backgroundColor: '#1118', padding: { x: 6, y: 4 },
+    }).setOrigin(1, 0).setDepth(12).setInteractive({ useHandCursor: true }).setAlpha(0.85)
+    this.muteBtn.on('pointerdown', (pointer, lx, ly, event) => {
+      event.stopPropagation()
+      const muted = toggleMute()
+      this.muteBtn.setText(muted ? '🔇' : '🔊')
+    })
+  }
+
+  togglePause() {
+    if (this.gameEnded) return
+    this.paused = !this.paused
+    if (this.paused) {
+      this.physics.pause()
+      this.pauseOverlay.setVisible(true)
+      this.pausePanel.setVisible(true)
+      this.pausePanelGlow.setVisible(true)
+      this.pauseText.setVisible(true)
+      this.pauseSub.setVisible(true)
+    } else {
+      this.physics.resume()
+      this.pauseOverlay.setVisible(false)
+      this.pausePanel.setVisible(false)
+      this.pausePanelGlow.setVisible(false)
+      this.pauseText.setVisible(false)
+      this.pauseSub.setVisible(false)
+    }
   }
 
   // ── HUD ──────────────────────────────────────
@@ -1160,15 +1869,15 @@ class GameScene extends Phaser.Scene {
       fontFamily: 'system-ui', fontSize: '13px', color: '#94a3b8',
     }).setOrigin(1, 0).setDepth(10).setShadow(0, 1, '#000000', 0.8, false, true)
 
-    this.comboGaugeLabel = this.add.text(W / 2, 24, 'CHAIN', {
-      fontFamily: 'system-ui', fontSize: '12px', color: '#93c5fd',
+    this.comboGaugeLabel = this.add.text(W / 2, 32, 'CHAIN', {
+      fontFamily: 'system-ui', fontSize: '11px', color: '#93c5fd',
     }).setOrigin(0.5).setDepth(10).setShadow(0, 1, '#000000', 0.8, false, true)
 
-    this.comboGaugeBg = this.add.rectangle(W / 2 - 100, 43, 200, 8, 0x0f172a, 0.85)
+    this.comboGaugeBg = this.add.rectangle(W / 2 - 100, 48, 200, 7, 0x0f172a, 0.85)
       .setOrigin(0, 0.5).setDepth(10)
       .setStrokeStyle(1, C.neonCyan, 0.25)
 
-    this.comboGaugeFill = this.add.rectangle(W / 2 - 100, 43, 0, 8, C.neonCyan, 0.92)
+    this.comboGaugeFill = this.add.rectangle(W / 2 - 100, 48, 0, 7, C.neonCyan, 0.92)
       .setOrigin(0, 0.5).setDepth(10)
 
     // Level progress bar
@@ -1203,7 +1912,7 @@ class GameScene extends Phaser.Scene {
       .setAlpha(0)
 
     this.infoText = this.add
-      .text(W / 2, H / 2 + 20, 'Press SPACE or Click to launch', {
+      .text(W / 2, H / 2 + 20, 'SPACE / Click / Tap to launch', {
         fontFamily: 'system-ui',
         fontSize: '22px',
         color: '#e2e8f0',
@@ -1344,9 +2053,7 @@ class GameScene extends Phaser.Scene {
     else if (progress > 0.5) this.progressBar.setFillStyle(C.neonGreen, 0.8)
     else this.progressBar.setFillStyle(C.neonCyan, 0.8)
 
-    const spd = Math.round(this.stageBallSpeed)
-    const modeTag = this.mode === 'pro' ? 'PRO' : 'CLASSIC'
-    this.stageMetaText.setText(`Bricks: ${remaining}  |  Speed: ${spd}  |  ${modeTag}`)
+    this.stageMetaText.setText(`Bricks: ${remaining}`)
   }
 
   drawTimerBars() {
@@ -1369,9 +2076,9 @@ class GameScene extends Phaser.Scene {
 
   // ── BALL ─────────────────────────────────────
   spawnBall(stuck = false) {
-    const ball = this.balls.create(this.paddle.x, this.paddle.y - 22, 'ball')
+    const ball = this.balls.create(this.paddle.x, this.paddle.y - 24, 'ball')
     if (!ball) return null
-    ball.setCircle(7, 2, 2)
+    ball.setCircle(9, 3, 3)
     ball.setBounce(1, 1)
     ball.setCollideWorldBounds(true)
     ball.setDepth(4)
@@ -1476,14 +2183,21 @@ class GameScene extends Phaser.Scene {
     ball.setVelocity(vx, vy)
 
     this.tweens.killTweensOf(paddle)
-    paddle.setScale(1, 1)
+    // Restore correct display size before squash (preserves Athena width boost)
+    paddle.setDisplaySize(this.currentPaddleWidth, 20)
+    const baseScaleX = paddle.scaleX
+    const baseScaleY = paddle.scaleY
     this.tweens.add({
       targets: paddle,
-      scaleX: 1.04,
-      scaleY: 0.96,
+      scaleX: baseScaleX * 1.04,
+      scaleY: baseScaleY * 0.96,
       duration: 68,
       yoyo: true,
       ease: 'Sine.easeOut',
+      onComplete: () => {
+        // Ensure scale returns to exact correct value after tween
+        paddle.setDisplaySize(this.currentPaddleWidth, 20)
+      },
     })
 
     // Preserve combo chains across paddle touches to reward controlled rallies.
@@ -1623,7 +2337,29 @@ class GameScene extends Phaser.Scene {
       this.dropPowerup(x, y)
     }
 
-    if (this.bricks.countActive(true) === 0) {
+    const remaining = this.bricks.countActive(true)
+
+    // ── Slow-motion on final brick ──────────────
+    if (remaining === 1) {
+      this.time.timeScale = 0.35
+      this.physics.world.timeScale = 2.8
+      // Camera zoom-in for dramatic effect
+      this.cameras.main.zoomTo(1.04, 600, 'Sine.easeInOut')
+      // Use real-time setTimeout so slow-mo lasts intended 900ms, not 2500ms
+      setTimeout(() => {
+        if (this.scene && this.scene.isActive()) {
+          this.time.timeScale = 1
+          this.physics.world.timeScale = 1
+          this.cameras.main.zoomTo(1, 300)
+        }
+      }, 900)
+    }
+
+    if (remaining === 0) {
+      // Restore time in case slow-mo was active
+      this.time.timeScale = 1
+      this.physics.world.timeScale = 1
+      this.cameras.main.zoomTo(1, 100)
       this.levelComplete()
     }
   }
@@ -1689,8 +2425,39 @@ class GameScene extends Phaser.Scene {
     const type = pw.getData('type')
     const x = pw.x
     const y = pw.y
+    this.tweens.killTweensOf(pw)
     pw.disableBody(true, true)
-    sfx(680, 1000, 0.12, 0.05, 'triangle')
+    sfxPowerup()
+
+    // ── Power-up pickup label ───────────────────
+    const labels = {
+      zeus: '⚡ ZEUS CHAIN!',
+      artemis: '🏹 MULTIBALL!',
+      heph: '🔥 FIREBALL!',
+      athena: '🛡 WIDE SHIELD!',
+      hermes: '🪽 SPEED BOOST!',
+    }
+    const labelColors = {
+      zeus: '#22d3ee', artemis: '#4ade80', heph: '#f97316',
+      athena: '#a855f7', hermes: '#fbbf24',
+    }
+    const label = this.add.text(x, y - 20, labels[type] || type, {
+      fontFamily: 'system-ui', fontSize: '20px', fontStyle: 'bold',
+      color: labelColors[type] || '#ffffff',
+      stroke: '#000', strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(15).setScale(0.4)
+    this.tweens.add({
+      targets: label,
+      y: y - 60, scaleX: 1, scaleY: 1,
+      duration: 350, ease: 'Back.easeOut',
+      onComplete: () => {
+        this.tweens.add({
+          targets: label, alpha: 0, y: y - 80,
+          duration: 450, delay: 400,
+          onComplete: () => label.destroy(),
+        })
+      },
+    })
 
     for (let i = 0; i < 8; i++) {
       const particle = this.add.circle(x, y, Phaser.Math.Between(2, 4), C.white, 0.95).setDepth(12)
@@ -1889,8 +2656,7 @@ class GameScene extends Phaser.Scene {
 
       const cueTier = this.combo >= 10 ? 3 : this.combo >= 7 ? 2 : this.combo >= 5 ? 1 : 0
       if (cueTier > this.lastComboCue) {
-        const start = cueTier === 1 ? 700 : cueTier === 2 ? 860 : 980
-        sfx(start, start + 280, 0.08, 0.04, 'triangle')
+        sfxComboMilestone(cueTier)
         const flashAlpha = cueTier === 1 ? 0.04 : cueTier === 2 ? 0.06 : 0.08
         this.flashOverlay.setAlpha(flashAlpha)
         this.tweens.killTweensOf(this.flashOverlay)
@@ -1922,10 +2688,15 @@ class GameScene extends Phaser.Scene {
 
   // ── LEVEL FLOW ───────────────────────────────
   levelComplete() {
+    if (!this.isRoundActive) return  // guard against duplicate calls
     this.isRoundActive = false
     this.balls.clear(true, true)
+    this.powerups.clear(true, true)  // clear any falling powerups
     this.clearPowerupEffects()
-    sfx(440, 880, 0.2, 0.06, 'triangle')
+    sfxLevelComplete()
+
+    // Celebration flash
+    this.cameras.main.flash(300, 250, 200, 50)
 
     this.saveState()
     if (this.score > getHiScore()) setHiScore(this.score)
@@ -1937,14 +2708,16 @@ class GameScene extends Phaser.Scene {
       if (nextTemple >= TEMPLES.length) {
         this.gameEnded = true
         if (this.score > getHiScore()) setHiScore(this.score)
+        clearProgress()  // Game complete — clear save
         this.showVictoryScreen()
-        sfx(440, 1320, 0.3, 0.07, 'triangle')
+        sfxLevelComplete()
         return
       }
       this.registry.set('templeIdx', nextTemple)
       this.registry.set('levelIdx', 0)
       this.registry.set('score', this.score)
       this.registry.set('lives', this.lives)
+      this.saveState()  // Save next temple state for Continue
       this.cameras.main.fadeOut(500)
       this.time.delayedCall(500, () => this.scene.start('UpgradeScene'))
       return
@@ -1952,6 +2725,7 @@ class GameScene extends Phaser.Scene {
 
     this.levelIdx = nextLevelIdx
     this.registry.set('levelIdx', nextLevelIdx)
+    this.saveState()  // Save next level state for Continue
     this.showLevelTransition()
   }
 
@@ -1981,7 +2755,7 @@ class GameScene extends Phaser.Scene {
               if (this.gameEnded) return
               this.loadLevel()
               this.spawnBall(true)
-              this.infoText.setText('Press SPACE or Click to launch').setVisible(true)
+              this.infoText.setText('SPACE / Click / Tap to launch').setVisible(true)
             },
           })
         })
@@ -2042,12 +2816,20 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(41).setAlpha(0).setShadow(0, 1, '#000000', 0.85, false, true)
     this.tweens.add({ targets: stats, alpha: 1, duration: 350, delay: 1040 })
 
-    const restart = this.add.text(W / 2, H / 2 + 124, 'Press R to play again', {
+    const restart = this.add.text(W / 2, H / 2 + 124, '[ Press R or Tap to Play Again ]', {
       fontFamily: 'system-ui', fontSize: '18px', color: '#94a3b8',
     }).setOrigin(0.5).setDepth(41).setAlpha(0).setShadow(0, 1, '#000000', 0.85, false, true)
+      .setInteractive({ useHandCursor: true })
+    restart.on('pointerdown', () => {
+      this.registry.set('score', 0)
+      this.registry.set('lives', 3)
+      this.registry.set('templeIdx', 0)
+      this.registry.set('levelIdx', 0)
+      this.scene.start('MenuScene')
+    })
     this.tweens.add({ targets: restart, alpha: 1, duration: 400, delay: 1200 })
 
-    sfx(520, 1040, 0.24, 0.06, 'triangle')
+    sfxLevelComplete()
   }
 
   clearPowerupEffects() {
@@ -2073,6 +2855,20 @@ class GameScene extends Phaser.Scene {
   saveState() {
     this.registry.set('score', this.score)
     this.registry.set('lives', this.lives)
+    // Persist full progress to localStorage (reads from registry for up-to-date state)
+    const r = this.registry
+    saveProgress({
+      score: this.score,
+      lives: this.lives,
+      templeIdx: r.get('templeIdx'),
+      levelIdx: r.get('levelIdx'),
+      paddleW: this.basePaddleWidth,
+      ballSpd: this.baseBallSpeed,
+      dropRate: this.powerupChance,
+      comboBon: this.comboMultiplierBonus,
+      mode: this.mode,
+      difficulty: r.get('difficulty') || 'normal',
+    })
   }
 
   loseLife() {
@@ -2083,9 +2879,23 @@ class GameScene extends Phaser.Scene {
     this.comboExpireAt = 0
     this.updateComboDisplay()
     this.balls.clear(true, true)
+    this.powerups.clear(true, true)  // clear falling powerups on life loss
     this.clearPowerupEffects()
-    sfx(260, 80, 0.2, 0.06, 'sawtooth')
-    this.cameras.main.shake(100, 0.005)
+    sfxGameOver()
+    this.saveState()  // persist life loss immediately
+
+    // Enhanced screen shake + red flash on life loss
+    this.cameras.main.shake(180, 0.008)
+    this.cameras.main.flash(200, 180, 30, 30, false, null, this)
+    // Brief paddle wobble
+    this.tweens.add({
+      targets: this.paddle,
+      angle: { from: -6, to: 6 },
+      duration: 70,
+      yoyo: true,
+      repeat: 2,
+      onComplete: () => this.paddle.setAngle(0),
+    })
 
     this.heartsText.setText(this.getHeartsString())
     if (this.score > getHiScore()) setHiScore(this.score)
@@ -2093,11 +2903,12 @@ class GameScene extends Phaser.Scene {
 
     if (this.lives <= 0) {
       this.gameEnded = true
+      clearProgress()  // Game over — clear save
       this.showGameOverScreen()
       return
     }
     this.spawnBall(true)
-    this.infoText.setText('Ball Lost!\nPress SPACE or Click').setVisible(true)
+    this.infoText.setText('Ball Lost!\nSPACE / Click / Tap to launch').setVisible(true)
   }
 
   // ── TRAIL ────────────────────────────────────
@@ -2107,23 +2918,26 @@ class GameScene extends Phaser.Scene {
       if (!ball.active || ball.getData('stuck')) return
       const trail = ball.getData('trail') || []
       trail.push({ x: ball.x, y: ball.y })
-      if (trail.length > 10) trail.shift()
+      if (trail.length > 14) trail.shift()
       ball.setData('trail', trail)
       const color = this.fireballActive ? C.neonOrange : this.hermesActive ? C.gold : C.neonCyan
       trail.forEach((pos, i) => {
-        const alpha = (i / trail.length) * 0.28
-        const radius = 7 * (i / trail.length) * 0.7
+        const alpha = (i / trail.length) * 0.38
+        const radius = 9 * (i / trail.length) * 0.75
         this.trailGfx.fillStyle(color, alpha)
         this.trailGfx.fillCircle(pos.x, pos.y, Math.max(1, radius))
         if (i > 0) {
           const prev = trail[i - 1]
-          this.trailGfx.lineStyle(Math.max(1, radius * 0.5), color, alpha * 0.8)
+          this.trailGfx.lineStyle(Math.max(1, radius * 0.6), color, alpha * 0.85)
           this.trailGfx.lineBetween(prev.x, prev.y, pos.x, pos.y)
         }
       })
 
-      this.trailGfx.fillStyle(C.white, 0.24)
-      this.trailGfx.fillCircle(ball.x, ball.y, 2)
+      // Bright core glow on ball center
+      this.trailGfx.fillStyle(C.white, 0.35)
+      this.trailGfx.fillCircle(ball.x, ball.y, 4)
+      this.trailGfx.fillStyle(color, 0.18)
+      this.trailGfx.fillCircle(ball.x, ball.y, 12)
     })
   }
 
@@ -2147,9 +2961,17 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(41).setAlpha(0).setShadow(0, 2, '#000000', 0.9, false, true)
     this.tweens.add({ targets: scoreText, alpha: 1, duration: 400, delay: 500 })
 
-    const restart = this.add.text(W / 2, H / 2 + 65, 'Press R to try again', {
+    const restart = this.add.text(W / 2, H / 2 + 65, '[ Press R or Tap to Try Again ]', {
       fontFamily: 'system-ui', fontSize: '18px', color: '#94a3b8',
     }).setOrigin(0.5).setDepth(41).setAlpha(0).setShadow(0, 1, '#000000', 0.85, false, true)
+      .setInteractive({ useHandCursor: true })
+    restart.on('pointerdown', () => {
+      this.registry.set('score', 0)
+      this.registry.set('lives', 3)
+      this.registry.set('templeIdx', 0)
+      this.registry.set('levelIdx', 0)
+      this.scene.start('MenuScene')
+    })
     this.tweens.add({
       targets: restart, alpha: { from: 0, to: 1 }, duration: 400, delay: 800,
       onComplete: () => {
@@ -2173,22 +2995,7 @@ class GameScene extends Phaser.Scene {
 
     // Pause toggle
     if (Phaser.Input.Keyboard.JustDown(this.keyP) && !this.gameEnded) {
-      this.paused = !this.paused
-      if (this.paused) {
-        this.physics.pause()
-        this.pauseOverlay.setVisible(true)
-        this.pausePanel.setVisible(true)
-        this.pausePanelGlow.setVisible(true)
-        this.pauseText.setVisible(true)
-        this.pauseSub.setVisible(true)
-      } else {
-        this.physics.resume()
-        this.pauseOverlay.setVisible(false)
-        this.pausePanel.setVisible(false)
-        this.pausePanelGlow.setVisible(false)
-        this.pauseText.setVisible(false)
-        this.pauseSub.setVisible(false)
-      }
+      this.togglePause()
       return
     }
     if (this.paused) return
@@ -2203,17 +3010,39 @@ class GameScene extends Phaser.Scene {
     }
 
     if (!this.gameEnded) {
+      const kbLeft = this.cursors.left.isDown
+      const kbRight = this.cursors.right.isDown
       const speed = this.hermesActive ? 740 : 540
-      if (this.cursors.left.isDown) this.paddle.setVelocityX(-speed)
-      else if (this.cursors.right.isDown) this.paddle.setVelocityX(speed)
-      else this.paddle.setVelocityX(0)
+      const halfPad = this.currentPaddleWidth / 2
+      const minX = halfPad + 2
+      const maxX = W - halfPad - 2
 
-      this.paddle.x = Phaser.Math.Clamp(
-        this.paddle.x,
-        this.currentPaddleWidth / 2 + 12,
-        W - this.currentPaddleWidth / 2 - 12
-      )
+      if (kbLeft || kbRight) {
+        // Keyboard takes priority
+        if (kbLeft) this.paddle.setVelocityX(-speed)
+        else this.paddle.setVelocityX(speed)
+      } else if (this.pointerControlX !== null && this.input.activePointer.isDown) {
+        // Touch/mouse drag — snap paddle to pointer X
+        this.paddle.setVelocityX(0)
+        this.paddle.x = Phaser.Math.Clamp(this.pointerControlX, minX, maxX)
+      } else {
+        this.paddle.setVelocityX(0)
+      }
+
+      this.paddle.x = Phaser.Math.Clamp(this.paddle.x, minX, maxX)
       this.paddle.y = PADDLE_Y
+
+      // Paddle glow follows paddle and changes color with active powerups
+      if (this.paddleGlow) {
+        this.paddleGlow.x = this.paddle.x
+        this.paddleGlow.width = this.currentPaddleWidth * 1.2
+        const glowColor = this.fireballActive ? C.neonOrange
+          : this.zeusActive ? C.neonCyan
+          : this.hermesActive ? C.gold
+          : this.athenaActive ? C.neonPurple
+          : this.temple.accent
+        this.paddleGlow.setFillStyle(glowColor, 0.18)
+      }
 
       if (Phaser.Input.Keyboard.JustDown(this.keySpace)) {
         this.launchBall()
@@ -2224,7 +3053,7 @@ class GameScene extends Phaser.Scene {
       if (!ball.active) return
       if (ball.getData('stuck')) {
         ball.x = this.paddle.x
-        ball.y = this.paddle.y - 22
+        ball.y = this.paddle.y - 24
       } else {
         this.preventPaddlePassThrough(ball)
 
@@ -2252,6 +3081,14 @@ class GameScene extends Phaser.Scene {
 
     if (!this.gameEnded && this.isRoundActive && this.balls.countActive(true) === 0) {
       this.loseLife()
+    }
+
+    // Safety net: catch level-complete if destroyBrick missed it (e.g. chain lightning timing)
+    if (!this.gameEnded && this.isRoundActive && this.bricks.countActive(true) === 0 && this.totalBricks > 0) {
+      this.time.timeScale = 1
+      this.physics.world.timeScale = 1
+      this.cameras.main.zoomTo(1, 100)
+      this.levelComplete()
     }
 
     this.drawTrail()
@@ -2413,6 +3250,15 @@ class UpgradeScene extends Phaser.Scene {
       card.on('pointerdown', () => {
         const current = this.registry.get(upgrade.key) ?? 0
         this.registry.set(upgrade.key, current + upgrade.delta)
+        // Persist progress after upgrade selection
+        const r = this.registry
+        saveProgress({
+          score: r.get('score'), lives: r.get('lives'),
+          templeIdx: r.get('templeIdx'), levelIdx: r.get('levelIdx'),
+          paddleW: r.get('paddleW'), ballSpd: r.get('ballSpd'),
+          dropRate: r.get('dropRate'), comboBon: r.get('comboBon'),
+          mode: r.get('mode'), difficulty: r.get('difficulty') || 'normal',
+        })
         sfx(500, 800, 0.12, 0.05, 'triangle')
         this.cameras.main.fadeOut(400)
         this.time.delayedCall(400, () => this.scene.start('GameScene'))
